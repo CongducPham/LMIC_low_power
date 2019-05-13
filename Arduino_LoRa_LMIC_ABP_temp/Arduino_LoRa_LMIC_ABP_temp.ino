@@ -29,6 +29,13 @@
  *
  *******************************************************************************/
 
+/*******************************************************************************
+ * 
+ * modified by C. Pham.
+ * Last update May 13th, 2019
+ *
+ *******************************************************************************/
+ 
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
@@ -82,21 +89,16 @@ unsigned int TX_INTERVAL = 5*60;
 
 // LoRaWAN NwkSKey, network session key
 //Enter here your Network Session Key from the TTN device info (same order, i.e. msb)
-//static const PROGMEM u1_t NWKSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-static const PROGMEM u1_t NWKSKEY[16] = { 0x11, 0xFF, 0x06, 0xBA, 0xAE, 0x0F, 0xA6, 0x6B, 0xA5, 0x8F, 0x1F, 0xE0, 0x52, 0xDD, 0x8A, 0x21 };
+static const PROGMEM u1_t NWKSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 // LoRaWAN AppSKey, application session key
 //Enter here your App Session Key from the TTN device info (same order, i.e. msb)
-//static const u1_t PROGMEM APPSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-static const u1_t PROGMEM APPSKEY[16] = { 0x54, 0xAC, 0x7B, 0x9E, 0xC6, 0x65, 0xD5, 0xCF, 0x0F, 0x1C, 0xD7, 0x92, 0x40, 0x11, 0x07, 0x2A };
+static const u1_t PROGMEM APPSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 // LoRaWAN end-device address (DevAddr)
 //Enter here your Device Address from the TTN device info (same order, i.e. msb)
 //example 0x12345678
-//static const u4_t DEVADDR = 0x12345678;
-
-//danang_software_park
-static const u4_t DEVADDR = 0x26041F24;
+static const u4_t DEVADDR = 0x12345678;
 
 ///////////////////////////////////////////////////////////////////
 
@@ -138,16 +140,6 @@ static osjob_t sendjob;
 extern uint32_t os_cumulated_sleep_time_in_seconds;
 #endif
 
-// Pin mapping
-/*
-const lmic_pinmap lmic_pins = {
-    .nss = 10,
-    .rxtx = LMIC_UNUSED_PIN,
-    .rst = 4,
-    .dio = {7, 8, 9},
-};
-*/
-
 /* Fabien Ferrero UCA breakout
  *  
  Arduino Mini       LoRa RFM95W 
@@ -172,8 +164,6 @@ const lmic_pinmap lmic_pins = {
   .rst = LMIC_UNUSED_PIN,
   .dio = {2, 7, 9},
 };
-
-
 
 /*
  *  LORA Radio Node
