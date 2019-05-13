@@ -20,10 +20,18 @@ Installation
 Flash a device
 --------------
 
-- have an Arduino device such as the Arduino Pro Mini in 8MHz and 3.3v version. Connect a LoRa radio module and change the DIO mapping in `Arduino_LoRa_LMIC_ABP_temp` according to your configuration. You can use our open source [Arduino Pro Mini PCB](https://github.com/CongducPham/LowCostLoRaGw#pcbs) to have DIO0 mapped to digital pin 2 and add a jump wire to DIO1 to one of your free Arduino digital pin. We plan to update the PCB in order to also wire DIO1 and RST. You can also use the open-source [UCA Pro Mini breakout](https://github.com/FabienFerrero/UCA_Board) from my colleague Fabien Ferrero that uses 2,7,9 and 8 for DIO0, DIO1, DIO2 and RST respectively.
+You will need an Arduino device such as the Arduino Pro Mini in 8MHz and 3.3v version. Connect a LoRa radio module and change the DIO mapping in `Arduino_LoRa_LMIC_ABP_temp` according to your configuration. 
 
-- in order to use `Arduino_LoRa_LMIC_ABP_temp`, you need to create a device for instance on TTN to get the device short address (32 bits) and, if you want, both NwkSKey and AppSKey. These information have to be filled in the example code. A nice tutorial can be found on https://medium.com/kkbankol-events/tutorial-build-a-open-source-smart-city-based-on-lora-7ca76b9a098. 
+You have several options of PCBs:
 
-- the default sleep time is 5min, `unsigned int TX_INTERVAL = 5*60;`. In a real-world application, set it to more than 10mins or higher.
+- our open source [ProMini PCB](https://github.com/CongducPham/LowCostLoRaGw#pcbs): DIO0, DIO1, RST and DIO2 are connected to D2, D3, D4 and D5 respectively if the corresponding solder pads are soldered together.
+
+- the open-source [UCA Pro Mini breakout](https://github.com/FabienFerrero/UCA_Board) from my colleague Fabien Ferrero that uses D2, D7, D9 and D8 for DIO0, DIO1, DIO2 and RST respectively.
+
+- the open source []Mini-Lora](https://github.com/hallard/Mini-LoRa) from C. Hallard that uses D2, D7, D8 and A0 for DIO0, DIO1, DIO2 and RST respectively.
+
+In order to use `Arduino_LoRa_LMIC_ABP_temp`, you need to create a device for instance on TTN to get the device short address (32 bits) and, if you want, both NwkSKey and AppSKey. These information have to be filled in the example code. A nice tutorial can be found on https://medium.com/kkbankol-events/tutorial-build-a-open-source-smart-city-based-on-lora-7ca76b9a098. 
+
+The default sleep time is 5min, `unsigned int TX_INTERVAL = 5*60;`. In a real-world application, set it to more than 10mins or higher.
 
 Enjoy! C. Pham
