@@ -140,35 +140,49 @@ static osjob_t sendjob;
 extern uint32_t os_cumulated_sleep_time_in_seconds;
 #endif
 
-/* Fabien Ferrero UCA breakout
- *  
- Arduino Mini       LoRa RFM95W 
- Mini Pro           Module
- D8          <----> RST
- MISO  (D12) <----> MISO
- MOSI  (D11) <----> MOSI
- SCK   (D13) <----> CLK
- SS    (D10) <----> SEL (Chip Select)
- D2          <----> DIO0
- D7          <----> DIO1
- D9          <----> DIO2
- 3.3V        <----> Vcc
-
+/*
+ *  C. Pham's ProMini PCB
+ 
+// Pin mapping
+ 
+const lmic_pinmap lmic_pins = {
+  .nss = 10,
+  .rxtx = LMIC_UNUSED_PIN,
+  .rst = 4,
+  .dio = {2, 3, LMIC_UNUSED_PIN},
+};
 */
 
-// Pin mapping
+/* Fabien Ferrero UCA breakout
+ *  
+ */
+ 
+// Pin mapping 
 
 const lmic_pinmap lmic_pins = {
   .nss = 10,
   .rxtx = LMIC_UNUSED_PIN,
-  .rst = LMIC_UNUSED_PIN,
+  .rst = 8,
   .dio = {2, 7, 9},
 };
+
+
+/*
+ *  C. Hallard's ch2i Mini-Lora  
+ 
+// Pin mapping
+ 
+const lmic_pinmap lmic_pins = {
+  .nss = 10,
+  .rxtx = LMIC_UNUSED_PIN,
+  .rst = A0,
+  .dio = {2, 7, 8},
+};
+*/
 
 /*
  *  LORA Radio Node
  
-
 // Pin mapping
  
 const lmic_pinmap lmic_pins = {
@@ -177,7 +191,6 @@ const lmic_pinmap lmic_pins = {
   .rst = 9,
   .dio = {2, 3, 4},
 };
-
 */
 
 /*****************************
