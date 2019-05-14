@@ -140,6 +140,18 @@ static osjob_t sendjob;
 extern uint32_t os_cumulated_sleep_time_in_seconds;
 #endif
 
+/******************************************
+ _     ___  ________ _____         _       
+| |    |  \/  |_   _/  __ \       (_)      
+| |    | .  . | | | | /  \/  _ __  _ _ __  
+| |    | |\/| | | | | |     | '_ \| | '_ \ 
+| |____| |  | |_| |_| \__/\ | |_) | | | | |
+\_____/\_|  |_/\___/ \____/ | .__/|_|_| |_|
+                            | |            
+                            |_|      
+
+*******************************************/           
+                 
 /*
  *  C. Pham's ProMini PCB
  
@@ -313,7 +325,7 @@ void onEvent (ev_t ev) {
 
     t_complete = os_getTime();
               
-    Serial.print(t_complete);
+    Serial.print((uint32_t)t_complete);
     Serial.print(": ");
     switch(ev) {
         case EV_SCAN_TIMEOUT:
@@ -546,7 +558,7 @@ void do_send(osjob_t* j){
         LMIC_setTxData2(1, message, r_size, 0);
 
         t_queued = os_getTime();
-        Serial.print(t_queued);
+        Serial.print((uint32_t)t_queued);
         Serial.print(": ");
         
         Serial.println(F("Packet queued"));      

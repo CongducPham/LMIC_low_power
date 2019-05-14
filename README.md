@@ -1,7 +1,7 @@
 LMIC_low_power
 ==============
 
-This is a first attempt to add low-power mode to the Arduino LMIC port. the `lmic` folder contains the modified version of the LMIC port based on version `1.5.0+arduino-2`. Modified files are:
+This is a first attempt to add low-power mode to the [Arduino LMIC port](https://github.com/matthijskooijman/arduino-lmic). The `lmic` folder contains the modified version of the LMIC port based on version `1.5.0+arduino-2`. Modified files are:
 
 - `lmic/config.h`
 - `lmic/hal.h`
@@ -9,7 +9,7 @@ This is a first attempt to add low-power mode to the Arduino LMIC port. the `lmi
 
 `Arduino_LoRa_LMIC_ABP_temp` is the LMIC-based Arduino example similar to the `Arduino_LoRa_temp` [example](https://github.com/CongducPham/LowCostLoRaGw/tree/master/Arduino) of the our [low-cost LoRa IoT framework](https://github.com/CongducPham/LowCostLoRaGw). Its structure and features are the same (simple temperature sensor, keep track of sequence number on reset, low-power consumption down to 5uA in sleep mode) except that it uses the LMIC port to build a LoRaWAN device. For smallest power consumption, please look at our YouTube video tutorial [Extreme low-cost & low-power LoRa IoT for real-world deployment](https://www.youtube.com/watch?v=2_VQpcCwdd8).
 
-The main reason of this contribution is because low-power mode on AVR microcontrollers makes both `millis()` and `micros()` to be not updated, causing timing issues in the LMIC stack. The idea is to store the amount of sleep time in order to add it to the value returned by `hal_ticks()`. A new function `hal_sleep_lowpower(u1_t sleepval)` is introduced to allow the main low-power loop to indicate to the LMIC stack how much sleep time (in seconds) it has to take into account when returning `hal_ticks()`.
+The main reason of this contribution is because low-power mode on AVR microcontrollers makes both `millis()` and `micros()` to be not updated, causing timing issues in the LMIC stack, especially the time to complete the EV_TXCOMPLETE event. The idea is to store the amount of sleep time in order to add it to the value returned by `hal_ticks()`. A new function `hal_sleep_lowpower(u1_t sleepval)` is introduced to allow the main low-power loop to indicate to the LMIC stack how much sleep time (in seconds) it has to take into account when returning `hal_ticks()`.
 
 Installation
 ------------ 
