@@ -20,7 +20,7 @@ Installation
 Flash a device
 --------------
 
-You will need an Arduino device such as the Arduino Pro Mini in 8MHz and 3.3v version. Connect a LoRa radio module and change the DIO mapping in `Arduino_LoRa_LMIC_ABP_temp` according to your configuration. 
+You will need an Arduino device such as the Arduino Pro Mini in 8MHz and 3.3v version. Connect a LoRa radio module and change the DIO mapping in `Arduino_LoRa_LMIC_ABP_temp` according to your configuration. The example uses DR_SF12.
 
 You have several options of PCBs:
 
@@ -35,5 +35,58 @@ You have several options of PCBs:
 In order to use `Arduino_LoRa_LMIC_ABP_temp`, you need to create a device for instance on TTN to get the device short address (32 bits) and, if you want, both NwkSKey and AppSKey. These information have to be filled in the example code. A nice tutorial can be found on https://medium.com/kkbankol-events/tutorial-build-a-open-source-smart-city-based-on-lora-7ca76b9a098. 
 
 The default sleep time is 5min, `unsigned int TX_INTERVAL = 5*60;`. In a real-world application, set it to more than 10mins or higher.
+
+Output from Serial Monitor
+--------------------------
+
+Here is a typical output from Arduino IDE's Serial Monitor with both #define SHOW_LOW_POWER_CYCLE and #define SHOW_LMIC_LOWPOWER_TIMING uncommented. To deploy a sensor device for a real-world scenario, comment these lines.
+
+```
+LoRa temperature sensor, LMIC extended version
+Arduino Pro Mini detected
+ATmega328P detected
+Get back previous sx1272 config
+Using seqnoUp of 1
+Forced to use default parameters
+Using idle period of 300
+Reading 244
+Reading 238
+Reading 235
+Reading 233
+Reading 230
+Mean temp is 22.25
+Sending \!TC/22.25
+Real payload size is 10
+234974: Packet queued
+454645: EV_TXCOMPLETE (includes waiting for RX windows)
+diff in ticks: 219671
+diff in seconds: 3
+now micros: 7287424
+cumulated sleep: 0
+now ticks: 455464
+now ticks from os_getTime(): 455464
+Switch to power saving mode
+8888888888888888888888888888888888881D[860]
+Reading 305
+Reading 302
+Reading 299
+Reading 296
+Reading 292
+Mean temp is 22.25
+Sending \!TC/22.25
+Real payload size is 10
+18623475: Packet queued
+18843145: EV_TXCOMPLETE (includes waiting for RX windows)
+diff in ticks: 219670
+diff in seconds: 3
+now micros: 12504112
+cumulated sleep: 289
+now ticks: 18844007
+now ticks from os_getTime(): 18844007
+Switch to power saving mode
+888888888888
+```
+
+As you can see, after the wake up from the sleep period of 5mins, `EV_TXCOMPLETE` happens after about 3s ("`diff in seconds: 3`") which means that the transmission happen almost immediately. This is actually the normal behavior as a sleep time of 5mins is more than the minimum off-time imposed by the LMIC's duty-cycle rule (about 140s for DR_SF12). Therefore the transmission can be scheduled to happen immediately, validating the correct timing of the LMIC stack after a sleep period.
 
 Enjoy! C. Pham

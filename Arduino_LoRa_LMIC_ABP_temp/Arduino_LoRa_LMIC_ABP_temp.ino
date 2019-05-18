@@ -32,7 +32,7 @@
 /*******************************************************************************
  * 
  * modified by C. Pham.
- * Last update May 13th, 2019
+ * Last update May 16th, 2019
  *
  *******************************************************************************/
  
@@ -63,7 +63,7 @@
 //you MUST uncomment #define LMIC_LOWPOWER in your libraries/lmic/src/lmic/config.h file
 #define LOW_POWER
 #define LOW_POWER_HIBERNATE
-
+#define SHOW_LOW_POWER_CYCLE
 #define SHOW_LMIC_LOWPOWER_TIMING
 ///////////////////////////////////////////////////////////////////
 
@@ -154,6 +154,7 @@ extern uint32_t os_cumulated_sleep_time_in_seconds;
 
 /*
  *  C. Pham's ProMini PCB
+
  
 // Pin mapping
  
@@ -178,9 +179,9 @@ const lmic_pinmap lmic_pins = {
   .dio = {2, 7, 9},
 };
 
-
 /*
  *  C. Hallard's ch2i Mini-Lora  
+
  
 // Pin mapping
  
@@ -194,6 +195,7 @@ const lmic_pinmap lmic_pins = {
 
 /*
  *  LORA Radio Node
+
  
 // Pin mapping
  
@@ -457,33 +459,49 @@ void onEvent (ev_t ev) {
                   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
                   hal_sleep_lowpower(8);  
                   waiting_t = waiting_t - 8158;
-                  //PRINT_CSTSTR("%s","8");             
+#ifdef SHOW_LOW_POWER_CYCLE                  
+                  PRINT_CSTSTR("%s","8");
+#endif                               
                 }
                 else if (waiting_t > 4158) {
                   LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
                   hal_sleep_lowpower(4);  
                   waiting_t = waiting_t - 4158;
-                  //PRINT_CSTSTR("%s","4");
+#ifdef SHOW_LOW_POWER_CYCLE                  
+                  PRINT_CSTSTR("%s","4");
+#endif                  
                 }
                 else if (waiting_t > 2158) {
                   LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF);
                   hal_sleep_lowpower(2);  
                   waiting_t = waiting_t - 2158;
-                  //PRINT_CSTSTR("%s","2");
+#ifdef SHOW_LOW_POWER_CYCLE                  
+                  PRINT_CSTSTR("%s","2");
+#endif                  
                 }
                 else if (waiting_t > 1158) {
                   LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
                   hal_sleep_lowpower(1);  
                   waiting_t = waiting_t - 1158;
-                  //PRINT_CSTSTR("%s","1");
+#ifdef SHOW_LOW_POWER_CYCLE                  
+                  PRINT_CSTSTR("%s","1");
+#endif                  
                 }      
                 else {
-                  delay(waiting_t); 
-                  //PRINT_CSTSTR("%s","D[");
-                  //PRINT_VALUE("%d", waiting_t);
-                  //PRINT_CSTSTR("%s","]");
+                  delay(waiting_t);
+#ifdef SHOW_LOW_POWER_CYCLE                   
+                  PRINT_CSTSTR("%s","D[");
+                  PRINT_VALUE("%d", waiting_t);
+                  PRINT_CSTSTR("%s","]");
+#endif                  
                   waiting_t = 0;
-                }          
+                }    
+                   
+#ifdef SHOW_LOW_POWER_CYCLE
+                FLUSHOUTPUT
+                delay(1);
+#endif
+                   
 #elif defined __MK20DX256__ || defined __MKL26Z64__ || defined __MK64FX512__ || defined __MK66FX1M0__
                 // Teensy31/32 & TeensyLC
                 if (waiting_t < LOW_POWER_PERIOD*1000) {
@@ -683,7 +701,7 @@ void setup() {
     Serial.begin(38400);  
 #endif  
     // Print a start message
-    PRINT_CSTSTR("%s","LoRa temperature sensor, extended version\n");
+    PRINT_CSTSTR("%s","LoRa temperature sensor, LMIC extended version\n");
 
 #ifdef ARDUINO_AVR_PRO
     PRINT_CSTSTR("%s","Arduino Pro Mini detected\n");  
@@ -749,8 +767,7 @@ void setup() {
     if (my_sx1272config.flag1==0x12 && my_sx1272config.flag2==0x35) {
         PRINT_CSTSTR("%s","Get back previous sx1272 config\n");
     
-        // set sequence number for SX1272 library
-        // TODO use fcount
+        // set sequence number
         PRINT_CSTSTR("%s","Using seqnoUp of ");
         PRINT_VALUE("%d", my_sx1272config.seq);
         PRINTLN;
