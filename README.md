@@ -24,11 +24,13 @@ You will need an Arduino device such as the Arduino Pro Mini in 8MHz and 3.3v ve
 
 You have several options of PCBs:
 
-- our open source [ProMini PCB](https://github.com/CongducPham/LowCostLoRaGw#pcbs): DIO0, DIO1, RST and DIO2 are connected to D2, D3, D4 and D5 respectively if the corresponding solder pads are soldered together.
+- our open source [ProMini PCB](https://github.com/CongducPham/LowCostLoRaGw#pcbs) that uses D2, D3, D5 and D4 for DIO0, DIO1, DIO2 and RST respectively (provided that the corresponding solder pads are soldered together).
 
 - the open-source [UCA Pro Mini breakout](https://github.com/FabienFerrero/UCA_Board) from my colleague Fabien Ferrero that uses D2, D7, D9 and D8 for DIO0, DIO1, DIO2 and RST respectively.
 
-- the open source []Mini-Lora](https://github.com/hallard/Mini-LoRa) from C. Hallard that uses D2, D7, D8 and A0 for DIO0, DIO1, DIO2 and RST respectively.
+- the open source [Mini-Lora](https://github.com/hallard/Mini-LoRa) from C. Hallard that uses D2, D7, D8 and A0 for DIO0, DIO1, DIO2 and RST respectively.
+
+- the [LoRa Radio node](https://www.tindie.com/products/IOTMCU/lora-radio-node-v10/) from IOTMCU that uses D2 for DIO0 and D9 for RST. Then you can use jumper wires to connect DIO1 and DIO2 (these are available on a pin header) to some available pins (such as D3 and D4 for instance).
 
 In order to use `Arduino_LoRa_LMIC_ABP_temp`, you need to create a device for instance on TTN to get the device short address (32 bits) and, if you want, both NwkSKey and AppSKey. These information have to be filled in the example code. A nice tutorial can be found on https://medium.com/kkbankol-events/tutorial-build-a-open-source-smart-city-based-on-lora-7ca76b9a098. 
 
