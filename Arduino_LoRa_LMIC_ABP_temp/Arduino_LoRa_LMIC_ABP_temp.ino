@@ -32,7 +32,7 @@
 /*******************************************************************************
  * 
  * modified by C. Pham.
- * Last update May 16th, 2019
+ * Last update May 19th, 2019
  *
  *******************************************************************************/
  
@@ -55,7 +55,9 @@
 ///////////////////////////////////////////////////////////////////
 // COMMENT OR UNCOMMENT TO CHANGE FEATURES. 
 // ONLY IF YOU KNOW WHAT YOU ARE DOING!!! OTHERWISE LEAVE AS IT IS
-// 
+//
+//use EEPROM to store the packet sequence number (LMIC.seqnoUp) in order to keep correct value on reset
+//if you want the packet counter to be reset to 0, comment the following line 
 #define WITH_EEPROM
 //if you are low on program memory, comment STRING_LIB to save about 2K
 #define STRING_LIB
@@ -381,6 +383,10 @@ void onEvent (ev_t ev) {
             }
 
 #ifdef WITH_EEPROM
+            PRINT_CSTSTR("%s","Value of seqnoUp: ");
+            PRINT_VALUE("%d", LMIC.seqnoUp);
+            PRINTLN;
+        
             // save packet number for next packet in case of reboot
             my_sx1272config.seq=LMIC.seqnoUp;
             EEPROM.put(0, my_sx1272config);
@@ -759,52 +765,6 @@ void setup() {
     PRINT_CSTSTR("%s","SAM3X8E ARM Cortex-M3 detected\n");
 #endif
 
-#ifdef WITH_EEPROM
-    // get config from EEPROM
-    EEPROM.get(0, my_sx1272config);
-  
-    // found a valid config?
-    if (my_sx1272config.flag1==0x12 && my_sx1272config.flag2==0x35) {
-        PRINT_CSTSTR("%s","Get back previous sx1272 config\n");
-    
-        // set sequence number
-        PRINT_CSTSTR("%s","Using seqnoUp of ");
-        PRINT_VALUE("%d", my_sx1272config.seq);
-        PRINTLN;
-
-#ifdef FORCE_DEFAULT_VALUE
-        PRINT_CSTSTR("%s","Forced to use default parameters\n");
-        my_sx1272config.flag1=0x12;
-        my_sx1272config.flag2=0x35;
-        my_sx1272config.seq=0;
-        my_sx1272config.idle_period=TX_INTERVAL;    
-        my_sx1272config.overwrite=0;
-        EEPROM.put(0, my_sx1272config);
-#else
-        // get back the idle period
-        if (my_sx1272config.idle_period!=0 && my_sx1272config.overwrite==1) {
-          
-            PRINT_CSTSTR("%s","Used stored idle period\n");
-            idlePeriodInMin=my_sx1272config.idle_period;        
-        }
-        else
-            PRINT_CSTSTR("%s","Stored idle period is null\n");                 
-#endif    
-    
-        PRINT_CSTSTR("%s","Using idle period of ");
-        PRINT_VALUE("%d", TX_INTERVAL);
-        PRINTLN;     
-    }
-    else {
-        // otherwise, write config and start over
-        my_sx1272config.flag1=0x12;
-        my_sx1272config.flag2=0x35;
-        my_sx1272config.seq=0;
-        my_sx1272config.idle_period=TX_INTERVAL;
-        my_sx1272config.overwrite=0;
-    }
-#endif
-
     // LMIC init
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
@@ -880,8 +840,50 @@ void setup() {
     LMIC_setDrTxpow(DR_SF12,14);
 
 #ifdef WITH_EEPROM
-    // Initialize 
-    LMIC.seqnoUp = my_sx1272config.seq;
+    // get config from EEPROM
+    EEPROM.get(0, my_sx1272config);
+  
+    // found a valid config?
+    if (my_sx1272config.flag1==0x12 && my_sx1272config.flag2==0x35) {
+        PRINT_CSTSTR("%s","Get back previous sx1272 config\n");
+    
+        // set sequence number
+        LMIC.seqnoUp = my_sx1272config.seq;
+        PRINT_CSTSTR("%s","Using seqnoUp of ");
+        PRINT_VALUE("%d", LMIC.seqnoUp);
+        PRINTLN;      
+
+#ifdef FORCE_DEFAULT_VALUE
+        PRINT_CSTSTR("%s","Forced to use default parameters\n");
+        my_sx1272config.flag1=0x12;
+        my_sx1272config.flag2=0x35;
+        my_sx1272config.seq=LMIC.seqnoUp;
+        my_sx1272config.idle_period=TX_INTERVAL;    
+        my_sx1272config.overwrite=0;
+        EEPROM.put(0, my_sx1272config);
+#else
+        // get back the idle period
+        if (my_sx1272config.idle_period!=0 && my_sx1272config.overwrite==1) {
+          
+            PRINT_CSTSTR("%s","Used stored idle period\n");
+            idlePeriodInMin=my_sx1272config.idle_period;        
+        }
+        else
+            PRINT_CSTSTR("%s","Stored idle period is null\n");                 
+#endif    
+    
+        PRINT_CSTSTR("%s","Using idle period of ");
+        PRINT_VALUE("%d", TX_INTERVAL);
+        PRINTLN;     
+    }
+    else {
+        // otherwise, write config and start over
+        my_sx1272config.flag1=0x12;
+        my_sx1272config.flag2=0x35;
+        my_sx1272config.seq=0;
+        my_sx1272config.idle_period=TX_INTERVAL;
+        my_sx1272config.overwrite=0;
+    }
 #endif
     
     // Start job
