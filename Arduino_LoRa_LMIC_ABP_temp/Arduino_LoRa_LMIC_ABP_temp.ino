@@ -399,12 +399,16 @@ void onEvent (ev_t ev) {
             Serial.print(F("now micros: "));
             Serial.println((uint32_t)now_micros);
 
+#ifdef LMIC_LOWPOWER
             Serial.print(F("cumulated sleep: "));
             Serial.println((uint32_t)os_cumulated_sleep_time_in_seconds);
 
             Serial.print(F("now ticks: "));
             Serial.println((uint32_t)(us2osticks(now_micros) + sec2osticks(os_cumulated_sleep_time_in_seconds))); 
-            
+#else
+            Serial.print(F("now ticks: "));
+            Serial.println((uint32_t)(us2osticks(now_micros))); 
+#endif
             Serial.print(F("now ticks from os_getTime(): "));
             Serial.println((uint32_t)now);           
 #endif
