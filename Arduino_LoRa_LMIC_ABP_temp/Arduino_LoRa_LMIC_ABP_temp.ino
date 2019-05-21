@@ -209,6 +209,20 @@ const lmic_pinmap lmic_pins = {
 };
 */
 
+/*
+ *  LORA Nexus by Ideetron
+
+ 
+// Pin mapping
+
+const lmic_pinmap lmic_pins = {
+    .nss = 10,
+    .rxtx = LMIC_UNUSED_PIN,
+    .rst = LMIC_UNUSED_PIN, // hardwired to AtMega RESET
+    .dio = {4, 5, 7},
+};
+*/
+
 /*****************************
  _____           _      
 /  __ \         | |     

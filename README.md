@@ -32,6 +32,8 @@ You have several options of PCBs:
 
 - the [LoRa Radio node](https://www.tindie.com/products/IOTMCU/lora-radio-node-v10/) from IOTMCU that uses D2 for DIO0 and D9 for RST. Then you can use jumper wires to connect DIO1 and DIO2 (these are available on a pin header) to some available pins (such as D3 and D4 for instance).
 
+- the [LoRa Nexus](https://webshop.ideetron.nl/Nexus) from Ideetron that uses D4, D5, D7 and Arduino's RST for DIO0, DIO1, DIO2 and RST respectively.
+
 In order to use `Arduino_LoRa_LMIC_ABP_temp`, you need to create a device for instance on TTN to get the device short address (32 bits) and, if you want, both NwkSKey and AppSKey. These information have to be filled in the example code. A nice tutorial can be found on https://medium.com/kkbankol-events/tutorial-build-a-open-source-smart-city-based-on-lora-7ca76b9a098. 
 
 The default sleep time is 5min, `unsigned int TX_INTERVAL = 5*60;`. In a real-world application, set it to more than 10mins or higher.
