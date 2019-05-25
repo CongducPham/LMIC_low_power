@@ -14,13 +14,10 @@ double sensor_getValue();
 ///////////////////////////////////////////////////////////////////
 // CHANGE HERE THE READ PIN AND THE POWER PIN FOR THE TEMP. SENSOR
 #define PIN_READ  A0
-// use digital 9 to power the temperature sensor if needed
-// but on most ESP8266 boards pin 9 can not be used, so use pin 2 instead
-#if defined ARDUINO_ESP8266_ESP01 || defined ARDUINO_ESP8266_NODEMCU || defined IOTMCU_LORA_RADIO_NODE
-#define PIN_POWER 2
-#else
-#define PIN_POWER 9
-#endif
+// use digital 6 to power the temperature sensor if needed
+// actually you have to use a pin that is not used for the LMIC stack
+// As the LMIC pins depends on the board you are using, you have to change according to your configuration.
+#define PIN_POWER 6
 ///////////////////////////////////////////////////////////////////
 
 #if defined ARDUINO_AVR_PRO || defined ARDUINO_AVR_MINI || defined ARDUINO_SAM_DUE || defined __MK20DX256__  || defined __MKL26Z64__ || defined __MK64FX512__ || defined __MK66FX1M0__ || defined __SAMD21G18A__
