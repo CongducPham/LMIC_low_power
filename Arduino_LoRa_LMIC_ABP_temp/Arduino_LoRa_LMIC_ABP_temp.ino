@@ -688,7 +688,9 @@ void do_send(osjob_t* j){
         Serial.print((uint32_t)t_queued);
         Serial.print(": ");
         
-        Serial.println(F("Packet queued"));      
+        Serial.println(F("Packet queued"));
+        Serial.print(F("FREQ="));
+        Serial.println(LMIC.freq);              
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -787,6 +789,8 @@ void setup() {
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
+    
+    //LMIC_setClockError(MAX_CLOCK_ERROR * 2 / 100);    
 
     // Set static session parameters. Instead of dynamically establishing a session
     // by joining the network, precomputed session parameters are be provided.
