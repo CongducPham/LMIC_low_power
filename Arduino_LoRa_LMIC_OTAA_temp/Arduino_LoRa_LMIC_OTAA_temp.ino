@@ -11,10 +11,10 @@
  * world!", using frequency and encryption settings matching those of
  * the The Things Network.
  *
- * This uses ABP (Activation-by-personalisation), where a DevAddr and
- * Session keys are preconfigured (unlike OTAA, where a DevEUI and
- * application key is configured, while the DevAddr and session keys are
- * assigned/generated in the over-the-air-activation procedure).
+ * This uses OTAA (Over-the-air activation), where where a DevEUI and
+ * application key is configured, which are used in an over-the-air
+ * activation procedure where a DevAddr and session keys are
+ * assigned/generated for use with all further communication.
  *
  * Note: LoRaWAN per sub-band duty-cycle limitation is enforced (1% in
  * g1, 0.1% in g2), but not the TTN fair usage policy (which is probably
@@ -57,8 +57,8 @@
 // ONLY IF YOU KNOW WHAT YOU ARE DOING!!! OTHERWISE LEAVE AS IT IS
 //
 //use EEPROM to store the packet sequence number (LMIC.seqnoUp) in order to keep correct value on reset
-//if you want the packet counter to be reset to 0, comment the following line 
-#define WITH_EEPROM
+//if you want the packet counter to be reset to 0, comment the following line  
+//#define WITH_EEPROM
 //if you are low on program memory, comment STRING_LIB to save about 2K
 #define STRING_LIB
 //if you uncomment LOW_POWER then
@@ -87,24 +87,6 @@ unsigned int TX_INTERVAL = 5*60;
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-//For TTN, use specify ABP mode on the TTN device setting
-
-// LoRaWAN NwkSKey, network session key
-//Enter here your Network Session Key from the TTN device info (same order, i.e. msb)
-static const PROGMEM u1_t NWKSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-// LoRaWAN AppSKey, application session key
-//Enter here your App Session Key from the TTN device info (same order, i.e. msb)
-static const u1_t PROGMEM APPSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-// LoRaWAN end-device address (DevAddr)
-//Enter here your Device Address from the TTN device info (same order, i.e. msb)
-//example 0x12345678
-static const u4_t DEVADDR = 0x12345678;
-
-///////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////
 // IF YOU SEND A LONG STRING, INCREASE THE SIZE OF MESSAGE
 uint8_t message[80];
 ///////////////////////////////////////////////////////////////////
@@ -129,12 +111,23 @@ uint8_t message[80];
 #define FORCE_DEFAULT_VALUE
 ///////////////////////////////////////////////////////////////////
 
-// These callbacks are only used in over-the-air activation, so they are
-// left empty here (we cannot leave them out completely unless
-// DISABLE_JOIN is set in config.h, otherwise the linker will complain).
-void os_getArtEui (u1_t* buf) { }
-void os_getDevEui (u1_t* buf) { }
-void os_getDevKey (u1_t* buf) { }
+// This EUI must be in little-endian format, so least-significant-byte
+// first. When copying an EUI from ttnctl output, this means to reverse
+// the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
+// 0x70.
+static const u1_t PROGMEM APPEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
+
+// This should also be in little endian format, see above.
+static const u1_t PROGMEM DEVEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
+
+// This key should be in big endian format (or, since it is not really a
+// number but a block of memory, endianness does not really apply). In
+// practice, a key taken from ttnctl can be copied as-is.
+// The key shown here is the semtech default key.
+static const u1_t PROGMEM APPKEY[16] = { 0xD8, 0x42, 0x59, 0xAC, 0xB3, 0x54, 0xCA, 0x38, 0xD9, 0xB1, 0xBB, 0xEE, 0xE6, 0x38, 0xE5, 0xCF };
+void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
 static osjob_t sendjob;
 
@@ -363,6 +356,9 @@ void onEvent (ev_t ev) {
             break;
         case EV_JOINED:
             Serial.println(F("EV_JOINED"));
+            // Disable link check validation (automatically enabled
+            // during join, but not supported by TTN at this time).
+            LMIC_setLinkCheckMode(0);            
             break;
         case EV_RFU1:
             Serial.println(F("EV_RFU1"));
@@ -378,7 +374,7 @@ void onEvent (ev_t ev) {
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
 
             Serial.print(F("diff in ticks: "));
-            Serial.println(t_complete-t_queued);
+            //Serial.println(t_complete-t_queued);
             Serial.print(F("diff in seconds: "));
             Serial.println(osticks2ms(t_complete-t_queued)/1000);
     
@@ -478,6 +474,7 @@ void onEvent (ev_t ev) {
             while (waiting_t>0) {  
 
 #if defined ARDUINO_AVR_MEGA2560 || defined ARDUINO_AVR_PRO || defined ARDUINO_AVR_NANO || defined ARDUINO_AVR_UNO || defined ARDUINO_AVR_MINI || defined __AVR_ATmega32U4__
+                // ATmega2560, ATmega328P, ATmega168, ATmega32U4
                 // each wake-up introduces an overhead of about 158ms
                 if (waiting_t > 8158) {
                   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
@@ -530,16 +527,25 @@ void onEvent (ev_t ev) {
                 // Teensy31/32 & TeensyLC
                 if (waiting_t < LOW_POWER_PERIOD*1000) {
                   timer.setTimer(waiting_t);
+
+#ifdef LOW_POWER_HIBERNATE
+                  Snooze.hibernate(sleep_config);
+#else            
+                  Snooze.deepSleep(sleep_config);
+#endif                  
+                  //hal_sleep_lowpower((uint8_t)waiting_t/1000);
                   waiting_t = 0;
                 }
-                else
-                  waiting_t = waiting_t - LOW_POWER_PERIOD*1000;
-                        
+                else {
+
 #ifdef LOW_POWER_HIBERNATE
-                Snooze.hibernate(sleep_config);
+                  Snooze.hibernate(sleep_config);
 #else            
-                Snooze.deepSleep(sleep_config);
+                  Snooze.deepSleep(sleep_config);
 #endif
+                  //hal_sleep_lowpower(LOW_POWER_PERIOD);
+                  waiting_t = waiting_t - LOW_POWER_PERIOD*1000;
+                }
 
 #else
                 // use the delay function
@@ -762,25 +768,11 @@ void setup() {
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
     
-    //LMIC_setClockError(MAX_CLOCK_ERROR * 2 / 100);    
+    // Let LMIC compensate for +/- 10% clock error
+    // we take 10% error to better handle downlink messages    
+    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
 
-    // Set static session parameters. Instead of dynamically establishing a session
-    // by joining the network, precomputed session parameters are be provided.
-    #ifdef PROGMEM
-    // On AVR, these values are stored in flash and only copied to RAM
-    // once. Copy them to a temporary buffer here, LMIC_setSession will
-    // copy them into a buffer of its own again.
-    uint8_t appskey[sizeof(APPSKEY)];
-    uint8_t nwkskey[sizeof(NWKSKEY)];
-    memcpy_P(appskey, APPSKEY, sizeof(APPSKEY));
-    memcpy_P(nwkskey, NWKSKEY, sizeof(NWKSKEY));
-    LMIC_setSession (0x1, DEVADDR, nwkskey, appskey);
-    #else
-    // If not running an AVR with PROGMEM, just use the arrays directly
-    LMIC_setSession (0x1, DEVADDR, NWKSKEY, APPSKEY);
-    #endif
-
-    #if defined(CFG_eu868)
+#if defined(CFG_eu868)
     // Set up the channels used by the Things Network, which corresponds
     // to the defaults of most gateways. Without this, only three base
     // channels from the LoRaWAN specification are used, which certainly
@@ -805,16 +797,13 @@ void setup() {
     // devices' ping slots. LMIC does not have an easy way to define set this
     // frequency and support for class B is spotty and untested, so this
     // frequency is not configured here.
-    #elif defined(CFG_us915)
+#elif defined(CFG_us915)
     // NA-US channels 0-71 are configured automatically
     // but only one group of 8 should (a subband) should be active
     // TTN recommends the second sub band, 1 in a zero based count.
     // https://github.com/TheThingsNetwork/gateway-conf/blob/master/US-global_conf.json
     LMIC_selectSubBand(1);
-    #endif
-    
-    // Disable link check validation
-    LMIC_setLinkCheckMode(0);
+#endif
 
     //Seems that it is not true anymore    
     // TTN uses SF9 for its RX2 window.
@@ -825,11 +814,11 @@ void setup() {
     //Disable all channels, except for the 0 
     //FOR TESTING ONLY!
     
-    for (int i=1; i<9; i++) { // For EU; for US use i<71
-      if(i != 0) {
-        LMIC_disableChannel(i);
-      }
-    }
+    //for (int i=1; i<9; i++) { // For EU; for US use i<71
+    //  if(i != 0) {
+    //    LMIC_disableChannel(i);
+    //  }
+    //}
     
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
     LMIC_setDrTxpow(DR_SF12,14);
