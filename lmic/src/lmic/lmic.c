@@ -691,18 +691,25 @@ static void setBcnRxParams (void) {
 
 #if !defined(DISABLE_JOIN)
 static void initJoinLoop (void) {
+    //added by C. Pham
+#ifdef LMIC_SCG
+    LMIC.txChnl = 0;
+#else
     LMIC.txChnl = os_getRndU1() % 3;
-    LMIC.adrTxPow = 14;
     setDrJoin(DRCHG_SET, DR_SF7);
+#endif
+    LMIC.adrTxPow = 14;
     initDefaultChannels(1);
     ASSERT((LMIC.opmode & OP_NEXTCHNL)==0);
     LMIC.txend = LMIC.bands[BAND_MILLI].avail + rndDelay(8);
 }
 
-
 static ostime_t nextJoinState (void) {
     u1_t failed = 0;
-
+    //added by C. Pham
+#ifdef LMIC_SCG
+    setDrJoin(DRCHG_NOJACC, (dr_t)LMIC.datarate);
+#else
     // Try 869.x and then 864.x with same DR
     // If both fail try next lower datarate
     if( ++LMIC.txChnl == 3 )
@@ -714,6 +721,7 @@ static ostime_t nextJoinState (void) {
         else
             setDrJoin(DRCHG_NOJACC, decDR((dr_t)LMIC.datarate));
     }
+#endif
     // Clear NEXTCHNL because join state engine controls channel hopping
     LMIC.opmode &= ~OP_NEXTCHNL;
     // Move txend to randomize synchronized concurrent joins.

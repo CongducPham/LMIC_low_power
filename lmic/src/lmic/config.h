@@ -14,10 +14,15 @@
 // the HopeRF RFM95 boards.
 #define CFG_sx1276_radio 1
 
+#if defined __MK20DX256__ || defined __MKL26Z64__ || defined __MK64FX512__ || defined __MK66FX1M0__
+#define US_PER_OSTICK 20		// 35 works for mini-AES, 25 Works with original AES mode
+#else
 // 16 μs per tick
 // LMIC requires ticks to be 15.5μs - 100 μs long
 #define US_PER_OSTICK_EXPONENT 4
 #define US_PER_OSTICK (1 << US_PER_OSTICK_EXPONENT)
+#endif
+
 #define OSTICKS_PER_SEC (1000000 / US_PER_OSTICK)
 
 // Set this to 1 to enable some basic debug output (using printf) about
@@ -83,6 +88,17 @@
 //////////////////
 //added by C. Pham
 #define LMIC_LOWPOWER
+//////////////////
+
+//////////////////
+//added by C. Pham, only for Single-Channel Gateway
+#define LMIC_SCG
+
+#ifdef LMIC_SCG
+#ifndef DISABLE_INVERT_IQ_ON_RX
+#define DISABLE_INVERT_IQ_ON_RX
+#endif
+#endif
 //////////////////
 
 #endif // _lmic_config_h_

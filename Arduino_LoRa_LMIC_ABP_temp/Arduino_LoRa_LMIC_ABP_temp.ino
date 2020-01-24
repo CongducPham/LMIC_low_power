@@ -60,7 +60,7 @@
 //if you want the packet counter to be reset to 0, comment the following line 
 #define WITH_EEPROM
 //if you are low on program memory, comment STRING_LIB to save about 2K
-#define STRING_LIB
+//#define STRING_LIB
 //if you uncomment LOW_POWER then
 //you MUST uncomment #define LMIC_LOWPOWER in your libraries/lmic/src/lmic/config.h file
 #define LOW_POWER
@@ -110,8 +110,8 @@ uint8_t message[80];
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-// COMMENT THIS LINE IF YOU WANT TO DYNAMICALLY SET THE NODE'S ADDR 
-// OR SOME OTHER PARAMETERS BY REMOTE RADIO COMMANDS (WITH_RCVW)
+// COMMENT THIS LINE IF YOU WANT TO DYNAMICALLY SET SOME PARAMETERS 
+// BY DOWNLINK COMMANDS
 // LEAVE THIS LINE UNCOMMENTED IF YOU WANT TO USE THE DEFAULT VALUE
 // AND CONFIGURE YOUR DEVICE BY CHANGING MANUALLY THESE VALUES IN 
 // THE SKETCH.
@@ -762,7 +762,9 @@ void setup() {
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
     
-    //LMIC_setClockError(MAX_CLOCK_ERROR * 2 / 100);    
+    // Let LMIC compensate for +/- 10% clock error
+    // we take 10% error to better handle downlink messages    
+    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);   
 
     // Set static session parameters. Instead of dynamically establishing a session
     // by joining the network, precomputed session parameters are be provided.

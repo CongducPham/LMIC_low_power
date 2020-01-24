@@ -32,7 +32,8 @@
 /*******************************************************************************
  * 
  * modified by C. Pham for simple temperature sensor with low-power capability
- * Last update Dec 24th, 2019
+ * and support of single-channel gateway
+ * Last update Jan 22nd, 2020
  *
  *******************************************************************************/
  
@@ -40,6 +41,13 @@
 #include <hal/hal.h>
 #include <SPI.h>
 #include "my_temp_sensor_code.h"
+
+//uncomment if you are doing OTAA with a single-channel gateway
+//this will only enable the first mandatory channel 0 (e.g. EU 868.1MHz)
+//#define OTAA_SCG
+
+// Define the data rate (SF) to use
+int dr = DR_SF12;
 
 /********************************************************************
  _____              __ _                       _   _             
@@ -60,7 +68,7 @@
 //if you want the packet counter to be reset to 0, comment the following line  
 //#define WITH_EEPROM
 //if you are low on program memory, comment STRING_LIB to save about 2K
-#define STRING_LIB
+//#define STRING_LIB
 //if you uncomment LOW_POWER then
 //you MUST uncomment #define LMIC_LOWPOWER in your libraries/lmic/src/lmic/config.h file
 #define LOW_POWER
@@ -92,8 +100,8 @@ uint8_t message[80];
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-// COMMENT THIS LINE IF YOU WANT TO DYNAMICALLY SET THE NODE'S ADDR 
-// OR SOME OTHER PARAMETERS BY REMOTE RADIO COMMANDS (WITH_RCVW)
+// COMMENT THIS LINE IF YOU WANT TO DYNAMICALLY SET SOME PARAMETERS 
+// BY DOWNLINK COMMANDS
 // LEAVE THIS LINE UNCOMMENTED IF YOU WANT TO USE THE DEFAULT VALUE
 // AND CONFIGURE YOUR DEVICE BY CHANGING MANUALLY THESE VALUES IN 
 // THE SKETCH.
@@ -356,6 +364,42 @@ void onEvent (ev_t ev) {
             break;
         case EV_JOINED:
             Serial.println(F("EV_JOINED"));
+            
+            Serial.print("netid: ");
+            Serial.println(LMIC.netid, DEC);
+            Serial.print("devaddr: ");
+            Serial.println(LMIC.devaddr, HEX);
+            
+            Serial.print("artKey: ");
+            for (int i=0; i<sizeof(LMIC.artKey); i++) {
+              if (i != 0)
+                Serial.print("-");
+              if (LMIC.artKey[i]<16)
+                Serial.print("0");  
+              Serial.print(LMIC.artKey[i], HEX);
+            }
+            Serial.println("");
+            Serial.print("nwkKey: ");
+            for (int i=0; i<sizeof(LMIC.nwkKey); i++) {
+              if (i != 0)
+                Serial.print("-");
+              if (LMIC.nwkKey[i]<16)
+                Serial.print("0");                
+              Serial.print(LMIC.nwkKey[i], HEX);
+            }
+            Serial.println(""); 
+
+            #ifdef OTAA_SCG
+            //needed for OTAA with SCG
+            // Ignore the channels from the Join Accept
+            for (int i=1; i<9; i++) { // For EU; for US use i<71
+              if(i != 0) {
+                LMIC_disableChannel(i);
+              }
+            }            
+            LMIC_setDrTxpow(dr, 14);
+            #endif
+                        
             // Disable link check validation (automatically enabled
             // during join, but not supported by TTN at this time).
             LMIC_setLinkCheckMode(0);            
@@ -811,17 +855,18 @@ void setup() {
 
     //added by C. Pham
     //uncomment to only have the first frequency when sending to our low-cost gateway
+    //needed for OTAA with SCG
     //Disable all channels, except for the 0 
     //FOR TESTING ONLY!
     
-    //for (int i=1; i<9; i++) { // For EU; for US use i<71
-    //  if(i != 0) {
-    //    LMIC_disableChannel(i);
-    //  }
-    //}
+    for (int i=1; i<9; i++) { // For EU; for US use i<71
+      if(i != 0) {
+        LMIC_disableChannel(i);
+      }
+    }
     
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
-    LMIC_setDrTxpow(DR_SF12,14);
+    LMIC_setDrTxpow(dr,14);
 
 #ifdef WITH_EEPROM
     // get config from EEPROM

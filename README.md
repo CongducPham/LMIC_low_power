@@ -1,9 +1,9 @@
-LMIC_low_power
-==============
+LMIC_low_power 
+=======================================
 
 This is a first attempt to add low-power mode to the [Arduino LMIC port](https://github.com/matthijskooijman/arduino-lmic). The `lmic` folder contains the modified version of the LMIC port based on version `1.5.0+arduino-2`. Modified files are:
 
-- `lmic/config.h`: has an additional `#define LMIC_LOWPOWER` statement
+- `lmic/config.h`: has an additional `#define LMIC_LOWPOWER` statement 
 - `lmic/hal.h`: defines `hal_sleep_lowpower(u1_t sleepval)` function
 - `hal/hal.cpp`: adds `u4_t os_cumulated_sleep_time_in_seconds`, implements `hal_sleep_lowpower(u1_t sleepval)` function and modifies `hal_ticks()`
 
@@ -140,5 +140,56 @@ now ticks from os_getTime(): 9723286
 Switch to power saving mode
 88888888888888888841D[484]
 ```
+
+Using single-channel gateway
+============================
+
+There is also a modification to discuss with a single-channel gateway:
+
+- `lmic/config.h`: has an additional `#define LMIC_SCG` statement
+- `lmic/lmic.c` has the following modifications
+
+```
+static void initJoinLoop (void) {
+    //added by C. Pham
+#ifdef LMIC_SCG
+    LMIC.txChnl = 0;
+#else
+    LMIC.txChnl = os_getRndU1() % 3;
+    setDrJoin(DRCHG_SET, DR_SF7);
+#endif
+    LMIC.adrTxPow = 14;
+    initDefaultChannels(1);
+    ASSERT((LMIC.opmode & OP_NEXTCHNL)==0);
+    LMIC.txend = LMIC.bands[BAND_MILLI].avail + rndDelay(8);
+}
+```
+
+```
+static ostime_t nextJoinState (void) {
+    u1_t failed = 0;
+    //added by C. Pham
+#ifdef LMIC_SCG
+    setDrJoin(DRCHG_NOJACC, (dr_t)LMIC.datarate);
+#else
+    // Try 869.x and then 864.x with same DR
+    // If both fail try next lower datarate
+    if( ++LMIC.txChnl == 3 )
+        LMIC.txChnl = 0;
+    if( (++LMIC.txCnt & 1) == 0 ) {
+        // Lower DR every 2nd try (having tried 868.x and 864.x with the same DR)
+        if( LMIC.datarate == DR_SF12 )
+            failed = 1; // we have tried all DR - signal EV_JOIN_FAILED
+        else
+            setDrJoin(DRCHG_NOJACC, decDR((dr_t)LMIC.datarate));
+    }
+#endif
+    // Clear NEXTCHNL because join state engine controls channel hopping
+    LMIC.opmode &= ~OP_NEXTCHNL;
+    ...
+```
+- these modifications will force the `join-request` message to use the same datarate than the one use for the regular uplink data, e.g. SF12BW125    
+
+
 
 Enjoy! C. Pham
