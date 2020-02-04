@@ -6,6 +6,12 @@
 // compiler commandline, use this file instead.
 
 #define CFG_eu868 1
+//////////////////
+//added by C. Pham
+//currently it is a dirty hack to change the frequencies while keeping CFG_eu868-like behavior
+//so you need to ALSO define CFG_eu868 as we need the CFG_eu868-like behavior
+//TODO move to Arduio-LMIC MCCI 1.6?
+//#define CFG_eu433 1
 //#define CFG_us915 1
 // This is the SX1272/SX1273 radio, which is also used on the HopeRF
 // RFM92 boards.

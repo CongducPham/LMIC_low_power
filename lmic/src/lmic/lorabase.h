@@ -64,6 +64,25 @@ enum _dr_eu868_t { DR_SF12=0, DR_SF11, DR_SF10, DR_SF9, DR_SF8, DR_SF7, DR_SF7B,
 enum { DR_DFLTMIN = DR_SF7 };
 enum { DR_PAGE = DR_PAGE_EU868 };
 
+#if defined(CFG_eu433)
+//////////////////
+//added by C. Pham
+//really dirty hack to set 433MHz frequency band while keeping the EU868-like behavior!
+//only F1 to F6 are relevant. F1-F3 are the 3 mandatory freq and F6 is the freq for dowlink in RX2
+//normally, J4-J6 are not used by LMIC as the join frequencies are also set to F1-F3
+enum { EU868_F1 = 433175000,      // g1   SF7-12
+       EU868_F2 = 433375000,      // g1   SF7-12 FSK SF7/250
+       EU868_F3 = 433575000,      // g1   SF7-12
+       EU868_F4 = 433975000,      // g2   SF7-12
+       EU868_F5 = 434175000,      // g2   SF7-12
+       EU868_F6 = 434665000,      // g3   SF7-12
+       EU868_J4 = 433175000,      // g2   SF7-12  used during join
+       EU868_J5 = 433375000,      // g2   SF7-12   ditto
+       EU868_J6 = 433575000,      // g2   SF7-12   ditto
+};
+enum { EU868_FREQ_MIN = 433175000,
+       EU868_FREQ_MAX = 434665000 };
+#else
 // Default frequency plan for EU 868MHz ISM band
 // Bands:
 //  g1 :   1%  14dBm
@@ -82,6 +101,7 @@ enum { EU868_F1 = 868100000,      // g1   SF7-12
 };
 enum { EU868_FREQ_MIN = 863000000,
        EU868_FREQ_MAX = 870000000 };
+#endif
 
 enum { CHNL_PING         = 5 };
 enum { FREQ_PING         = EU868_F6 };  // default ping freq

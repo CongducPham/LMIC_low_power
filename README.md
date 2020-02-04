@@ -190,6 +190,19 @@ static ostime_t nextJoinState (void) {
 ```
 - these modifications will force the `join-request` message to use the same datarate than the one use for the regular uplink data, e.g. SF12BW125    
 
+Using 433MHz band
+=================
 
+There is also a modification to work in the 433MHz band. In `config.h` uncomment BOTH `#define CFG_eu868 1` and `#define CFG_eu433 1` to have your device sending on the 433MHz band. The 3 mandatory frequencies are then 433.175, 433.375 and 433.575 while the frequency for downlink in the RX2 window is set to 434.665 (according to LoRaWAN EU433 plan). If `#define LMIC_SCG` is on then only the first channel, i.e. 433.175MHz, will be used for both data uplink and join-request for OTAA. 
 
+Important notice
+================
+
+This modified LMIC distribution has by default:
+
+- `#define CFG_eu868 1`
+- `#define LMIC_LOWPOWER`
+- `#define LMIC_SCG`
+
+Comment `#define LMIC_SCG` if you want to benefit from the low-power features but talking to a multi-channel LoRaWAN gateway.
 Enjoy! C. Pham
