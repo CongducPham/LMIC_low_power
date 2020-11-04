@@ -101,9 +101,9 @@
 #define LMIC_SCG
 
 #ifdef LMIC_SCG
-#ifndef DISABLE_INVERT_IQ_ON_RX
-#define DISABLE_INVERT_IQ_ON_RX
-#endif
+//#ifndef DISABLE_INVERT_IQ_ON_RX
+//#define DISABLE_INVERT_IQ_ON_RX
+//#endif
 #endif
 //////////////////
 
