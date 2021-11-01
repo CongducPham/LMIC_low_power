@@ -1,5 +1,5 @@
 LMIC_low_power 
-=======================================
+==============
 
 This is a first attempt to add low-power mode to the [Arduino LMIC port](https://github.com/matthijskooijman/arduino-lmic). The `lmic` folder contains the modified version of the LMIC port based on version `1.5.0+arduino-2`. Modified files are:
 
